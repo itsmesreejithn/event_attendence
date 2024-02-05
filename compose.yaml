@@ -20,6 +20,7 @@ services:
     image: postgres:latest
     environment:
       - POSTGRES_PASSWORD=toor
+      - POSTGRES_DB=events
     volumes:
       - database:/data/db
     ports:
