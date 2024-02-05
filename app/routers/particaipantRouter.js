@@ -7,3 +7,5 @@ router
   .route("/")
   .get(participantController.getAllParticipants)
   .post(participantController.createParticipant);
+
+module.exports = router;
