@@ -1,0 +1,15 @@
+{
+  "name": "event_attendence",
+  "version": "1.0.0",
+  "description": "Backende service for tracking events attended by people (from where the attend) and giving analatical reprot on it",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon sever.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sreejit N",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
