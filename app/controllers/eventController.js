@@ -7,7 +7,7 @@ exports.getAllEvents = (req, res, next) => {
   });
 };
 
-exports.createEvents = (req, res, next) => {
+exports.createEvent = (req, res, next) => {
   res.status(200).json({
     status: "success",
     data: {

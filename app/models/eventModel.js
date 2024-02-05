@@ -1,11 +1,11 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../utils/dbConnection");
-const Participants = require("./participantsModel");
+// const Participants = require("./participantsModel");
 
 const date = new Date();
 
 const Events = sequelize.define("evnets", {
-  enentId: {
+  eventId: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
@@ -22,5 +22,6 @@ const Events = sequelize.define("evnets", {
   },
 });
 
-Events.belongsTo(Participants);
+Events.sync().then(() => console.log(`Events table created`));
+
 module.exports = Events;
