@@ -4,9 +4,9 @@ const router = express.Router();
 
 router
   .route("/")
-  // .get(eventController.getAllEvents)
-  .get(eventController.getAllEventsWithParticipants)
-  // .post(eventController.createEvent);
-  .post(eventController.createEventWithParticipant);
+  .get(eventController.getAllEvents)
+  // .get(eventController.getAllEventsWithParticipants)
+  .post(eventController.createEvent);
+// .post(eventController.createEventWithParticipant);
 
 module.exports = router;
