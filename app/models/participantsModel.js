@@ -1,8 +1,7 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../utils/dbConnection");
-// const Events = require("./eventModel");
+const db = require("../utils/dbConnection");
 
-const Participants = sequelize.define("participants", {
+const Participants = db.define("participants", {
   participantId: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -18,7 +17,5 @@ const Participants = sequelize.define("participants", {
     allowNull: false,
   },
 });
-
-Participants.sync().then(() => console.log(`Paricipants table created`));
 
 module.exports = Participants;
