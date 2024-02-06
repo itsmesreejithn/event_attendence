@@ -45,7 +45,7 @@ exports.createEvent = async (req, res, next) => {
 };
 
 exports.createEventWithParticipant = async (req, res, next) => {
-  const { eventName, participantName, participationMode } = req.body;
+  const { eventName, participants } = req.body;
   const transaction = await db.transaction();
 
   try {
@@ -57,25 +57,18 @@ exports.createEventWithParticipant = async (req, res, next) => {
         transaction,
       }
     );
-    const newParticipant = await Participants.create(
-      {
-        participantName,
-        participationMode,
-      },
-      {
-        transaction,
-      }
-    );
-    console.log(newEvent);
-    await Mapping.create(
-      {
+    const newParticipants = await Participants.bulkCreate(participants, {
+      transaction,
+    });
+    const mappingRecords = newParticipants.map((participant) => {
+      return {
         eventId: newEvent.eventId,
-        participantId: newParticipant.participantId,
-      },
-      {
-        transaction,
-      }
-    );
+        participantId: participant.participantId,
+      };
+    });
+    await Mapping.create(mappingRecords, {
+      transaction,
+    });
 
     await transaction.commit();
 
