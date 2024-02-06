@@ -1,4 +1,4 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes, Sequelize } = require("sequelize");
 const db = require("../utils/dbConnection");
 
 const date = new Date();
@@ -16,10 +16,12 @@ const Events = db.define(
       allowNull: false,
     },
     date: {
-      type: DataTypes.DATE,
-      defaultValue: `${date.getFullYear()}-${
-        date.getMonth() + 1
-      }-${date.getDay()}`,
+      type: DataTypes.DATEONLY,
+      defaultValue: DataTypes.NOW,
+    },
+    time: {
+      type: DataTypes.TIME,
+      defaultValue: Sequelize.literal("CURRENT_TIME"),
     },
   },
   {
