@@ -12,11 +12,12 @@ const Events = db.define(
       primaryKey: true,
     },
     eventName: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     date: {
       type: DataTypes.DATEONLY,
+      allowNull: false,
       defaultValue: DataTypes.NOW,
     },
     time: {
