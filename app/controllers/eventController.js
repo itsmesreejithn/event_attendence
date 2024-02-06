@@ -66,7 +66,7 @@ exports.createEventWithParticipant = async (req, res, next) => {
         participantId: participant.participantId,
       };
     });
-    await Mapping.create(mappingRecords, {
+    await Mapping.bulkCreate(mappingRecords, {
       transaction,
     });
 
@@ -76,7 +76,7 @@ exports.createEventWithParticipant = async (req, res, next) => {
       status: "success",
       data: {
         event: newEvent,
-        participant: newParticipant,
+        participant: newParticipants,
       },
     });
   } catch (error) {
