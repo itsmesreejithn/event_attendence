@@ -23,6 +23,14 @@ const EventParticipantMapping = db.define("eventparticipantmapping", {
 Participants.sync().then(() => console.log(`Paricipants table created`));
 Events.sync().then(() => console.log(`Events table created`));
 
-Events.belongsToMany(Participants, { through: EventParticipantMapping });
-Participants.belongsToMany(Events, { through: EventParticipantMapping });
+Events.belongsToMany(Participants, {
+  through: EventParticipantMapping,
+  foreignKey: "eventId",
+});
+Participants.belongsToMany(Events, {
+  through: EventParticipantMapping,
+  foreignKey: "participantId",
+});
 EventParticipantMapping.sync().then(() => console.log("Mapping table created"));
+
+module.exports = EventParticipantMapping;
