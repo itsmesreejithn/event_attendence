@@ -1,43 +1,89 @@
 const Participants = require("../models/participantsModel");
+const AppError = require("../utils/appError");
+const catchAsync = require("../utils/catchAsync");
 
-exports.getAllParticipants = async (req, res, next) => {
-  try {
-    const participants = await Participants.findAll({
-      attributes: {
-        exclude: ["participantId", "updatedAt", "createdAt"],
-      },
-    });
-    res.status(200).json({
-      status: "success",
-      data: {
-        participants,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "failed",
-      message: `Failed to fetch participants, ${error}`,
-    });
-  }
-};
+exports.getAllParticipants = catchAsync(async (req, res, next) => {
+  const participants = await Participants.findAll({
+    attributes: {
+      exclude: ["participantId", "updatedAt", "createdAt"],
+    },
+  });
+  res.status(200).json({
+    status: "success",
+    data: {
+      participants,
+    },
+  });
+});
 
-exports.createParticipant = async (req, res, next) => {
+exports.createParticipant = catchAsync(async (req, res, next) => {
   const { participantName, participationMode } = req.body;
-  try {
-    const newParticipant = await Participants.create({
-      participantName,
-      participationMode,
-    });
-    res.status(200).json({
-      status: "success",
-      data: {
-        paricipant: newParticipant,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "failed",
-      message: `Failed to create participant, ${error}`,
-    });
-  }
-};
+
+  const newParticipant = await Participants.create({
+    participantName,
+    participationMode,
+  });
+  res.status(200).json({
+    status: "success",
+    data: {
+      participant: newParticipant,
+    },
+  });
+});
+
+exports.getParticipant = catchAsync(async (req, res, next) => {
+  const participantId = req.params.id;
+  if (!participantId)
+    return next(new AppError("The participantId must be specified", 404));
+
+  const participant = await Participants.findByPk(participantId);
+  res.status(200).json({
+    status: "success",
+    data: {
+      participant,
+    },
+  });
+});
+
+exports.updateParticipant = catchAsync(async (req, res, next) => {
+  const participantId = req.params.id;
+  const { participantName, participationMode } = req.body;
+  if (!participantId)
+    return next(new AppError("The participantId must be spacified", 404));
+
+  const updateParticipant = await Participants.findByPk(participantId);
+  if (!updateParticipant)
+    return next(new AppError("The given participantId is not present", 404));
+
+  const updateParticipantObj = {};
+  if (participantName) updateParticipantObj.participantName = participantName;
+  if (participationMode)
+    updateParticipantObj.participationMode = participationMode;
+
+  const updatedParticipant = await Participants.update(updateParticipantObj, {
+    where: {
+      participantId,
+    },
+  });
+  res.status(200).json({
+    status: "success",
+    data: {
+      participant: updatedParticipant,
+    },
+  });
+});
+
+exports.deleteParticipant = catchAsync(async (req, res, next) => {
+  const participantId = req.params.id;
+  if (!participantId)
+    return next(new AppError("The participantId must be spacified", 404));
+  const deleteParticipant = await Participants.findByPk(participantId);
+  if (!deleteParticipant)
+    return next(new AppError("The given participantId is not presetn", 404));
+
+  const deletedParticipant = await Participants.destroy({
+    where: {
+      participantId,
+    },
+  });
+});

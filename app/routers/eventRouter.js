@@ -5,8 +5,11 @@ const router = express.Router();
 router
   .route("/")
   .get(eventController.getAllEvents)
-  // .get(eventController.getAllEventsWithParticipants)
   .post(eventController.createEvent);
-// .post(eventController.createEventWithParticipant);
 
+router
+  .route("/:id")
+  .get(eventController.getEvent)
+  .patch(eventController.updateEvent)
+  .delete(eventController.deleteEvent);
 module.exports = router;

@@ -60,6 +60,9 @@ exports.getAllEventsWithParticipants = async (req, res, next) => {
           },
         },
       ],
+      attributes: {
+        exclude: ["createdAt", "updatedAt"],
+      },
     });
     res.status(200).json({
       status: "success",
