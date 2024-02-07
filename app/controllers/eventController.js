@@ -1,12 +1,10 @@
 const Events = require("../models/eventModel");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
+const Mapping = require("../models/eventParticipantsMappingModel");
+
 exports.getAllEvents = catchAsync(async (req, res, next) => {
-  const events = await Events.findAll({
-    attributes: {
-      exclude: ["eventId", "createdAt", "updatedAt"],
-    },
-  });
+  const events = await Events.findAll();
   res.status(200).json({
     status: "success",
     data: {
@@ -80,6 +78,12 @@ exports.deleteEvent = catchAsync(async (req, res, next) => {
   const deletedEvent = await Events.destroy({
     where: {
       eventId,
+    },
+  });
+  res.status(200).json({
+    status: "success",
+    data: {
+      deleteEvent,
     },
   });
 });

@@ -27,6 +27,7 @@ const Events = db.define(
   },
   {
     freezeTableName: true,
+    timestamps: false,
   }
 );
 

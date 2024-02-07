@@ -3,11 +3,7 @@ const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 
 exports.getAllParticipants = catchAsync(async (req, res, next) => {
-  const participants = await Participants.findAll({
-    attributes: {
-      exclude: ["participantId", "updatedAt", "createdAt"],
-    },
-  });
+  const participants = await Participants.findAll();
   res.status(200).json({
     status: "success",
     data: {
@@ -17,11 +13,11 @@ exports.getAllParticipants = catchAsync(async (req, res, next) => {
 });
 
 exports.createParticipant = catchAsync(async (req, res, next) => {
-  const { participantName, participationMode } = req.body;
+  const { participantId, participantName } = req.body;
 
   const newParticipant = await Participants.create({
+    participantId,
     participantName,
-    participationMode,
   });
   res.status(200).json({
     status: "success",
@@ -84,6 +80,12 @@ exports.deleteParticipant = catchAsync(async (req, res, next) => {
   const deletedParticipant = await Participants.destroy({
     where: {
       participantId,
+    },
+  });
+  res.status(200).json({
+    status: "success",
+    data: {
+      deletedParticipant,
     },
   });
 });
