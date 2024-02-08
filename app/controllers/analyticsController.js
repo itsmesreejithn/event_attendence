@@ -49,6 +49,7 @@ exports.getAllEventsWithParticipants = catchAsync(async (req, res, next) => {
     include: [
       {
         model: Participants,
+        through: { attributes: [] },
       },
     ],
   });
@@ -67,6 +68,7 @@ exports.getEventsWithParticipnats = catchAsync(async (req, res, next) => {
     include: [
       {
         model: Participants,
+        through: { attributes: [] },
       },
     ],
   });
