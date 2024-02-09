@@ -7,11 +7,6 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const ApiFeatures = require("../utils/apiFeatures");
 
-const includeParticipants = {
-  mode: Participants,
-  through: { attributes: [] },
-};
-
 exports.createEventWithParticipant = catchAsync(async (req, res, next) => {
   const { eventId, participants } = req.body;
   // const transaction = await db.transaction();
@@ -62,7 +57,7 @@ exports.getAllEventsWithParticipants = catchAsync(async (req, res, next) => {
     .paginate()
     .sort()
     .filter()
-    .includeModel(Participants);
+    .includeModel(Participants, ["participationMode"]);
 
   const events = await features.execute();
 
@@ -95,7 +90,7 @@ exports.getEventsWithParticipnats = catchAsync(async (req, res, next) => {
 
 exports.updateEventPraticipant = catchAsync(async (req, res, next) => {
   const eventId = req.params.id;
-  const { participantId, time, date } = req.query;
+  const { participantId } = req.query;
 
   const { participationMode } = req.body;
 
@@ -113,11 +108,10 @@ exports.updateEventPraticipant = catchAsync(async (req, res, next) => {
   if (!eventParticipantMapping)
     return next(new AppError("No event with this prticipant found", 404));
 
-  if (time) eventParticipantMapping.time = time;
-  if (date) eventParticipantMapping.date = date;
-
-  await eventParticipantMapping.save();
-
+  if (participationMode) {
+    eventParticipantMapping.participationMode = participationMode;
+    await eventParticipantMapping.save();
+  }
   res.status(200).json({
     status: "success",
     data: {
