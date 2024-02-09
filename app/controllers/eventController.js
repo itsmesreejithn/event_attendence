@@ -14,11 +14,12 @@ exports.getAllEvents = catchAsync(async (req, res, next) => {
 });
 
 exports.createEvent = catchAsync(async (req, res, next) => {
-  const { eventName } = req.body;
+  const { eventName, category } = req.body;
   if (!eventName) return next(new AppError("There mus be an event name", 404));
 
   const newEvent = await Events.create({
     eventName: eventName,
+    category: category,
   });
   res.status(201).json({
     status: "success",
@@ -43,7 +44,7 @@ exports.getEvent = catchAsync(async (req, res, next) => {
 
 exports.updateEvent = catchAsync(async (req, res, next) => {
   const eventId = req.params.id;
-  const { eventName, date, time } = req.body;
+  const { eventName, category, date, time } = req.body;
   if (!eventId) return next(new AppError("The eventId must be spacified", 404));
 
   const updateEvent = await Events.findByPk(eventId);
@@ -52,8 +53,9 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
 
   const updateEventObj = {};
   if (eventName) updateEventObj.eventName = eventName;
-  if (date) updateEventObj.date = date;
+  if (category) updateEventObj.category = category;
   if (time) updateEventObj.time = time;
+  if (date) updateEventObj.date = date;
 
   const updatedEvent = await Events.update(updateEventObj, {
     where: {
@@ -82,8 +84,9 @@ exports.deleteEvent = catchAsync(async (req, res, next) => {
   });
   res.status(200).json({
     status: "success",
+    message: "Data Deleted",
     data: {
-      deleteEvent,
+      deletedEvent,
     },
   });
 });

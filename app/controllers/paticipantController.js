@@ -43,7 +43,7 @@ exports.getParticipant = catchAsync(async (req, res, next) => {
 
 exports.updateParticipant = catchAsync(async (req, res, next) => {
   const participantId = req.params.id;
-  const { participantName, participationMode } = req.body;
+  const { participantName } = req.body;
   if (!participantId)
     return next(new AppError("The participantId must be spacified", 404));
 
@@ -53,8 +53,6 @@ exports.updateParticipant = catchAsync(async (req, res, next) => {
 
   const updateParticipantObj = {};
   if (participantName) updateParticipantObj.participantName = participantName;
-  if (participationMode)
-    updateParticipantObj.participationMode = participationMode;
 
   const updatedParticipant = await Participants.update(updateParticipantObj, {
     where: {

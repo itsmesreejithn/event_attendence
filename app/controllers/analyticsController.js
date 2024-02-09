@@ -5,58 +5,71 @@ const { Op } = require("sequelize");
 const Events = require("../models/eventModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const ApiFeatures = require("../utils/apiFeatures");
+
+const includeParticipants = {
+  mode: Participants,
+  through: { attributes: [] },
+};
 
 exports.createEventWithParticipant = catchAsync(async (req, res, next) => {
-  const { eventName, participants } = req.body;
-  const transaction = await db.transaction();
+  const { eventId, participants } = req.body;
+  // const transaction = await db.transaction();
 
   try {
-    const newEvent = await Events.create(
-      {
-        eventName,
-      },
-      {
-        transaction,
-      }
-    );
+    // const newEvent = await Events.create(
+    //   {
+    //     eventName,
+    //   },
+    //   {
+    //     transaction,
+    //   }
+    // );
     const mappingRecords = participants.map((participant) => {
       return {
-        eventId: newEvent.eventId,
+        eventId: eventId,
         participantId: participant.participantId,
       };
     });
 
-    await Mapping.bulkCreate(mappingRecords, {
-      transaction,
-    });
+    await Mapping.bulkCreate(mappingRecords);
 
-    await transaction.commit();
+    // await transaction.commit();
 
     res.status(201).json({
       status: "success",
       data: {
-        event: newEvent,
+        event: mappingRecords,
       },
     });
   } catch (error) {
-    await transaction.rollback();
+    // await transaction.rollback();
     next(error);
   }
 });
 
 exports.getAllEventsWithParticipants = catchAsync(async (req, res, next) => {
-  const eventsPrticipants = await Events.findAll({
-    include: [
-      {
-        model: Participants,
-        through: { attributes: [] },
-      },
-    ],
-  });
+  const { page, limit, sortBy, sortOrder, filterBy, filterValue } = req.query;
+
+  const features = new ApiFeatures(Events, {
+    page,
+    limit,
+    sortBy,
+    sortOrder,
+    filterBy,
+    filterValue,
+  })
+    .paginate()
+    .sort()
+    .filter()
+    .includeModel(Participants);
+
+  const events = await features.execute();
+
   res.status(200).json({
     status: "success",
     data: {
-      events: eventsPrticipants,
+      events,
     },
   });
 });
@@ -82,37 +95,33 @@ exports.getEventsWithParticipnats = catchAsync(async (req, res, next) => {
 
 exports.updateEventPraticipant = catchAsync(async (req, res, next) => {
   const eventId = req.params.id;
-  const { participants, eventName, time, date } = req.body;
-  if (!eventId) return next(new AppError("The eventId must be provided", 404));
-  const findEventParticipant = await Events.findByPk(eventId, {
-    include: {
-      model: Participants,
+  const { participantId, time, date } = req.query;
+
+  const { participationMode } = req.body;
+
+  if (!eventId || !participantId)
+    return next(
+      new AppError("The eventId and participantId must be provided", 404)
+    );
+
+  const eventParticipantMapping = await Mapping.findOne({
+    where: {
+      eventId: eventId,
+      participantId: participantId,
     },
   });
-  if (!findEventParticipant)
-    return next(new AppError("No event present with this eventId", 404));
+  if (!eventParticipantMapping)
+    return next(new AppError("No event with this prticipant found", 404));
 
-  if (eventName) findEventParticipant.eventName = eventName;
-  if (time) findEventParticipant.time = time;
-  if (date) findEventParticipant.date = date;
-  if (participants && participants.length > 0) {
-    const updatedmappingRecords = participants.map((participant) => {
-      return {
-        eventId: eventId,
-        participantId: participant.participantId,
-      };
-    });
-    console.log(updatedmappingRecords);
+  if (time) eventParticipantMapping.time = time;
+  if (date) eventParticipantMapping.date = date;
 
-    await Mapping.bulkCreate(updatedmappingRecords);
-  }
-
-  await findEventParticipant.save();
+  await eventParticipantMapping.save();
 
   res.status(200).json({
     status: "success",
     data: {
-      event: findEventParticipant,
+      event: eventParticipantMapping,
     },
   });
 });

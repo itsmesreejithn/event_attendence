@@ -12,15 +12,6 @@ const Participants = db.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    //   GETTING LOCATION : FROM WHERE THE PARTICIPANT IS ATTENDING (WFH, WFO, NOT ATTENDING)
-    participationMode: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 1,
-      validate: {
-        isIn: [[1, 2, 3]],
-      },
-    },
   },
   {
     freezTableName: true,

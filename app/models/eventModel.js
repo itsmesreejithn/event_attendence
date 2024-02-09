@@ -15,10 +15,15 @@ const Events = db.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    category: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "all",
+    },
     date: {
       type: DataTypes.DATEONLY,
-      allowNull: false,
       defaultValue: DataTypes.NOW,
+      allowNull: false,
     },
     time: {
       type: DataTypes.TIME,
