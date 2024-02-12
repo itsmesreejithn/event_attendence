@@ -76,7 +76,7 @@ exports.getEventsWithParticipnats = catchAsync(async (req, res, next) => {
     include: [
       {
         model: Participants,
-        through: { attributes: [] },
+        through: { attributes: ["participationMode"] },
       },
     ],
   });
@@ -90,9 +90,8 @@ exports.getEventsWithParticipnats = catchAsync(async (req, res, next) => {
 
 exports.updateEventPraticipant = catchAsync(async (req, res, next) => {
   const eventId = req.params.id;
-  const { participantId } = req.query;
 
-  const { participationMode } = req.body;
+  const { participationMode, participantId } = req.body;
 
   if (!eventId || !participantId)
     return next(

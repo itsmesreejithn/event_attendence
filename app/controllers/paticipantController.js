@@ -1,6 +1,8 @@
+const Events = require("../models/eventModel");
 const Participants = require("../models/participantsModel");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
+const Mapping = require("../models/eventParticipantsMappingModel");
 
 exports.getAllParticipants = catchAsync(async (req, res, next) => {
   const participants = await Participants.findAll();
@@ -32,7 +34,12 @@ exports.getParticipant = catchAsync(async (req, res, next) => {
   if (!participantId)
     return next(new AppError("The participantId must be specified", 404));
 
-  const participant = await Participants.findByPk(participantId);
+  const participant = await Participants.findByPk(participantId, {
+    include: {
+      model: Events,
+      through: { attributes: ["participationMode"] },
+    },
+  });
   res.status(200).json({
     status: "success",
     data: {

@@ -14,12 +14,17 @@ exports.getAllEvents = catchAsync(async (req, res, next) => {
 });
 
 exports.createEvent = catchAsync(async (req, res, next) => {
-  const { eventName, category } = req.body;
+  const { eventName, category, date, time } = req.body;
   if (!eventName) return next(new AppError("There mus be an event name", 404));
+
+  category = category.toLowerCase();
+  eventName = eventName.toLowerCase();
 
   const newEvent = await Events.create({
     eventName: eventName,
     category: category,
+    date: date,
+    time: time,
   });
   res.status(201).json({
     status: "success",
