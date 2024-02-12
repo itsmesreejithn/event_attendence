@@ -8,6 +8,7 @@ const EventParticipantMapping = db.define(
   {
     eventId: {
       type: DataTypes.INTEGER,
+      primaryKey: true,
       references: {
         model: Events,
         key: "eventId",
@@ -15,6 +16,7 @@ const EventParticipantMapping = db.define(
     },
     participantId: {
       type: DataTypes.INTEGER,
+      primaryKey: true,
       references: {
         model: Participants,
         key: "participantId",
@@ -28,6 +30,15 @@ const EventParticipantMapping = db.define(
       validate: {
         isIn: [[1, 2, 3]],
       },
+    },
+    date: {
+      type: DataTypes.DATEONLY,
+      defaultValue: DataTypes.NOW,
+      primaryKey: true,
+    },
+    time: {
+      type: DataTypes.TIME,
+      defaultValue: Sequelize.literal("CURRENT_TIME"),
     },
   },
   {
@@ -46,6 +57,20 @@ Events.belongsToMany(Participants, {
   foreignKey: "eventId",
 });
 Events.sync().then(() => console.log(`Events table created`));
+
+Events.hasMany(EventParticipantMapping, {
+  foreignKey: "eventId",
+});
+EventParticipantMapping.belongsTo(Events, {
+  foreignKey: "eventId",
+});
+
+Participants.hasMany(EventParticipantMapping, {
+  foreignKey: "participantId",
+});
+EventParticipantMapping.belongsTo(Participants, {
+  foreignKey: "participantId",
+});
 
 EventParticipantMapping.sync().then(() => console.log("Mapping table created"));
 

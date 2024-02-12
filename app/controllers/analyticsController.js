@@ -1,52 +1,40 @@
 const Participants = require("../models/participantsModel");
 const Mapping = require("../models/eventParticipantsMappingModel");
 const db = require("../utils/dbConnection");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const Events = require("../models/eventModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const ApiFeatures = require("../utils/apiFeatures");
 
 exports.createEventWithParticipant = catchAsync(async (req, res, next) => {
-  const { eventId, participants } = req.body;
-  // const transaction = await db.transaction();
+  const { eventId, participants, date, time } = req.body;
 
-  try {
-    // const newEvent = await Events.create(
-    //   {
-    //     eventName,
-    //   },
-    //   {
-    //     transaction,
-    //   }
-    // );
-    const mappingRecords = participants.map((participant) => {
-      return {
-        eventId: eventId,
-        participantId: participant.participantId,
-      };
-    });
+  const mappingRecords = participants.map((participant) => {
+    return {
+      eventId: eventId,
+      participantId: participant.participantId,
+      date,
+      time,
+    };
+  });
 
-    await Mapping.bulkCreate(mappingRecords);
+  await Mapping.bulkCreate(mappingRecords);
 
-    // await transaction.commit();
+  res.status(201).json({
+    status: "success",
+    data: {
+      event: mappingRecords,
+    },
+  });
 
-    res.status(201).json({
-      status: "success",
-      data: {
-        event: mappingRecords,
-      },
-    });
-  } catch (error) {
-    // await transaction.rollback();
-    next(error);
-  }
+  next(error);
 });
 
 exports.getAllEventsWithParticipants = catchAsync(async (req, res, next) => {
   const { page, limit, sortBy, sortOrder, filterBy, filterValue } = req.query;
 
-  const features = new ApiFeatures(Events, {
+  const features = new ApiFeatures(Mapping, {
     page,
     limit,
     sortBy,
@@ -56,15 +44,59 @@ exports.getAllEventsWithParticipants = catchAsync(async (req, res, next) => {
   })
     .paginate()
     .sort()
-    .filter()
-    .includeModel(Participants, ["participationMode"]);
+    .filter();
 
-  const events = await features.execute();
+  const mappings = await features.execute();
+  console.log(mappings);
+
+  // const eventWithParticipant = {};
+  // await Promise.all(
+  //   mappings.map(async (mapping) => {
+  //     const event = await Events.findByPk(mapping.eventId);
+  //     const eventId = event.eventId;
+
+  //     if (!eventWithParticipant[eventId]) {
+  //       eventWithParticipant[eventId] = {
+  //         eventId: event.eventId,
+  //         eventName: event.eventName,
+  //         category: event.category,
+  //         date: mapping.date,
+  //         time: mapping.time,
+  //         participants: [],
+  //       };
+  //     }
+  //     const attendees = await Participants.findByPk(mapping.participantId);
+  //     eventWithParticipant[eventId].participants.push({
+  //       participantId: attendees.participantId,
+  //       participantName: attendees.participantName,
+  //       participationMode: mapping.participationMode,
+  //     });
+  //   })
+  // );
+
+  // const eventArray = Object.values(eventWithParticipant);
+
+  const eventsWithParticipants = await Promise.all(
+    mappings.map(async (mapping) => {
+      const event = await Events.findByPk(mapping.eventId);
+      const participant = await Participants.findByPk(mapping.participantId);
+      return {
+        eventId: event.eventId,
+        eventName: event.eventName,
+        category: event.category,
+        date: mapping.date,
+        time: mapping.time,
+        participantId: participant.id,
+        participantName: participant.participantName,
+        participationMode: mapping.participationMode,
+      };
+    })
+  );
 
   res.status(200).json({
     status: "success",
     data: {
-      events,
+      eventsWithParticipants,
     },
   });
 });
@@ -76,7 +108,7 @@ exports.getEventsWithParticipnats = catchAsync(async (req, res, next) => {
     include: [
       {
         model: Participants,
-        through: { attributes: ["participationMode"] },
+        through: { attributes: ["participationMode", "date", "time"] },
       },
     ],
   });
@@ -91,7 +123,7 @@ exports.getEventsWithParticipnats = catchAsync(async (req, res, next) => {
 exports.updateEventPraticipant = catchAsync(async (req, res, next) => {
   const eventId = req.params.id;
 
-  const { participationMode, participantId } = req.body;
+  const { participationMode, participantId, date } = req.body;
 
   if (!eventId || !participantId)
     return next(
@@ -102,10 +134,13 @@ exports.updateEventPraticipant = catchAsync(async (req, res, next) => {
     where: {
       eventId: eventId,
       participantId: participantId,
+      date: date,
     },
   });
   if (!eventParticipantMapping)
-    return next(new AppError("No event with this prticipant found", 404));
+    return next(
+      new AppError("No event with this prticipant and date found", 404)
+    );
 
   if (participationMode) {
     eventParticipantMapping.participationMode = participationMode;

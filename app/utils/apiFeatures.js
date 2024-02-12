@@ -1,3 +1,6 @@
+const Events = require("../models/eventModel");
+const Participants = require("../models/participantsModel");
+
 class ApiFeatures {
   constructor(model, queryString) {
     this.model = model;
@@ -29,20 +32,49 @@ class ApiFeatures {
 
   filter() {
     const { filterBy, filterValue } = this.queryString;
+    if (filterBy === "category" || filterBy === "eventName") {
+      this.includeModel(Events, [], filterBy, filterValue);
+      return this;
+    }
     if (filterBy && filterValue) {
       this.filters[filterBy] = filterValue;
     }
-
     return this;
   }
 
-  includeModel(model, throughAttribute = []) {
-    this.options.include = [
-      {
-        model: model,
-        through: { attributes: throughAttribute },
-      },
-    ];
+  includeModel(model, throughAttribute = [], filterBy, filterValue) {
+    console.log(filterBy);
+    if (model == Events || model == Participants) {
+      if (filterBy === "category") {
+        this.options.include = [
+          {
+            model: model,
+            where: {
+              category: filterValue,
+            },
+          },
+        ];
+      } else {
+        this.options.include = [
+          {
+            model: model,
+            where: {
+              eventName: filterValue,
+            },
+          },
+        ];
+      }
+    } else {
+      this.options.include = [
+        {
+          model: model,
+          where: {
+            category: filterValue,
+          },
+          through: [{ attibutes: throughAttribute }],
+        },
+      ];
+    }
     return this;
   }
 
@@ -50,7 +82,6 @@ class ApiFeatures {
     if (Object.keys(this.filters).length > 0) {
       this.options.where = { ...this.options.where, ...this.filters };
     }
-
     return this.model.findAll(this.options);
   }
 }

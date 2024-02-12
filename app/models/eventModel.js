@@ -20,15 +20,6 @@ const Events = db.define(
       allowNull: false,
       defaultValue: "all",
     },
-    date: {
-      type: DataTypes.DATEONLY,
-      defaultValue: DataTypes.NOW,
-      allowNull: false,
-    },
-    time: {
-      type: DataTypes.TIME,
-      defaultValue: Sequelize.literal("CURRENT_TIME"),
-    },
   },
   {
     freezeTableName: true,
