@@ -47,56 +47,47 @@ exports.getAllEventsWithParticipants = catchAsync(async (req, res, next) => {
     .filter();
 
   const mappings = await features.execute();
-  console.log(mappings);
 
-  // const eventWithParticipant = {};
-  // await Promise.all(
-  //   mappings.map(async (mapping) => {
-  //     const event = await Events.findByPk(mapping.eventId);
-  //     const eventId = event.eventId;
+  const eventsByDate = {};
+  mappings.forEach((mapping) => {
+    const eventDate = mapping.date;
+    if (!eventsByDate[eventDate]) {
+      eventsByDate[eventDate] = [];
+    }
+    eventsByDate[eventDate].push(mapping);
+  });
 
-  //     if (!eventWithParticipant[eventId]) {
-  //       eventWithParticipant[eventId] = {
-  //         eventId: event.eventId,
-  //         eventName: event.eventName,
-  //         category: event.category,
-  //         date: mapping.date,
-  //         time: mapping.time,
-  //         participants: [],
-  //       };
-  //     }
-  //     const attendees = await Participants.findByPk(mapping.participantId);
-  //     eventWithParticipant[eventId].participants.push({
-  //       participantId: attendees.participantId,
-  //       participantName: attendees.participantName,
-  //       participationMode: mapping.participationMode,
-  //     });
-  //   })
-  // );
-
-  // const eventArray = Object.values(eventWithParticipant);
-
-  const eventsWithParticipants = await Promise.all(
-    mappings.map(async (mapping) => {
-      const event = await Events.findByPk(mapping.eventId);
-      const participant = await Participants.findByPk(mapping.participantId);
-      return {
-        eventId: event.eventId,
-        eventName: event.eventName,
-        category: event.category,
-        date: mapping.date,
-        time: mapping.time,
-        participantId: participant.id,
-        participantName: participant.participantName,
-        participationMode: mapping.participationMode,
-      };
+  const eventsWithParticipantsByDate = await Promise.all(
+    Object.entries(eventsByDate).map(async ([date, mappings]) => {
+      const eventsWithParticipants = {};
+      await Promise.all(
+        mappings.map(async (mapping) => {
+          const event = await Events.findByPk(mapping.eventId);
+          const participant = await Participants.findByPk(
+            mapping.participantId
+          );
+          if (!eventsWithParticipants[event.eventId]) {
+            eventsWithParticipants[event.eventId] = {
+              eventId: event.eventId,
+              eventName: event.eventName,
+              category: event.category,
+              participants: [],
+            };
+          }
+          eventsWithParticipants[event.eventId].participants.push({
+            participantId: participant.participantId,
+            participantName: participant.participantName,
+            participationMode: mapping.participationMode,
+          });
+        })
+      );
+      return { date, events: eventsWithParticipants };
     })
   );
-
   res.status(200).json({
     status: "success",
     data: {
-      eventsWithParticipants,
+      eventsWithParticipantsByDate,
     },
   });
 });
