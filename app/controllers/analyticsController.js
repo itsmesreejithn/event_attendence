@@ -70,6 +70,7 @@ exports.getAllEventsWithParticipants = catchAsync(async (req, res, next) => {
             eventsWithParticipants[event.eventId] = {
               eventId: event.eventId,
               eventName: event.eventName,
+              time: mapping.time,
               category: event.category,
               participants: [],
             };
