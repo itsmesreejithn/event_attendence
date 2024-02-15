@@ -10,6 +10,7 @@ const ListEvents = () => {
   const [eventState, setEventState] = useRecoilState(eventIdState);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [eventName, setEventName] = useState("");
+  const [category, setCategory] = useState("all");
 
   const handleShowCreateEvent = () => setShowCreateEvent(true);
   const handleClose = () => {
@@ -20,6 +21,7 @@ const ListEvents = () => {
     try {
       const response = await axios.post(`${URL}/events/`, {
         eventName: eventName,
+        category: category,
       });
       if (response) {
         setShowCreateEvent(false);
@@ -33,6 +35,10 @@ const ListEvents = () => {
     setEventName(e.target.value);
   };
 
+  const handleEventCategoryChange = (e) => {
+    setCategory(e.target.value);
+  };
+
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -43,7 +49,7 @@ const ListEvents = () => {
       }
     };
     fetchEvents();
-  }, []);
+  }, [submitEventName]);
 
   const handleEventChange = (e) => {
     setEventState(e.target.value);
@@ -97,6 +103,13 @@ const ListEvents = () => {
             id="eventName"
             placeholder="Enter event name"
             onChange={handleEventNameChange}
+          />
+          <Form.Label htmlFor="event category">Category</Form.Label>
+          <Form.Control
+            type="text"
+            id="eventCategory"
+            value={category}
+            onChange={handleEventCategoryChange}
           />
         </Modal.Body>
         <Modal.Footer>

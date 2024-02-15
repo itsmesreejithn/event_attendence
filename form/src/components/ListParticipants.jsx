@@ -58,7 +58,7 @@ const ListParticipants = () => {
       }
     };
     fetchParticipants();
-  }, []);
+  }, [submitParticipant]);
 
   const handleCheckboxChange = (participantId) => {
     setSelectedParticipants((prevSelected) => {
