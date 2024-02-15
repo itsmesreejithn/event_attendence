@@ -9,7 +9,7 @@ const ApiFeatures = require("../utils/apiFeatures");
 
 exports.createEventWithParticipant = catchAsync(async (req, res, next) => {
   const { eventId, participants, date, time } = req.body;
-
+  console.log(eventId);
   const mappingRecords = participants.map((participant) => {
     return {
       eventId: eventId,

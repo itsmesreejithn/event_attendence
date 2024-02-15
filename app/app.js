@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const errorHandler = require("./utils/errorHandler");
 const AppError = require("./utils/appError");
@@ -6,6 +7,8 @@ const AppError = require("./utils/appError");
 const eventRouter = require("./routers/eventRouter");
 const participantRouter = require("./routers/particaipantRouter");
 const analyticsRouter = require("./routers/analyticsRouter");
+
+app.use(cors());
 
 app.use(express.json());
 
