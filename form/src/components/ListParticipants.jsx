@@ -58,7 +58,7 @@ const ListParticipants = () => {
       }
     };
     fetchParticipants();
-  }, [submitParticipant]);
+  }, []);
 
   const handleCheckboxChange = (participantId) => {
     setSelectedParticipants((prevSelected) => {
@@ -104,7 +104,7 @@ const ListParticipants = () => {
       <Col>
         <ListGroup
           className="w-100 text-center"
-          style={{ maxHeight: "500px", overflowY: "auto" }}
+          style={{ maxHeight: "400px", overflowY: "auto" }}
         >
           <ListGroup.Item>
             <Form.Check

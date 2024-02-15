@@ -16,15 +16,21 @@ import axios from "axios";
 import URL from "../url";
 
 function App() {
+  const globalTime = new Date();
   const eventId = parseInt(useRecoilValue(eventIdState));
   const participants = useRecoilValue(participantsState);
   const [showAlert, setShowAlert] = useState(false);
   const [date, setDate] = useState(new Date());
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState(
+    `${globalTime.getHours()}:${globalTime.getMinutes()}:${globalTime.getSeconds()}`
+  );
 
   useEffect(() => {
     const updateTime = () => {
-      setTime(new Date());
+      const newTime = new Date();
+      setTime(
+        `${newTime.getHours()}:${newTime.getMinutes()}:${newTime.getSeconds()}`
+      );
     };
     const updateDate = () => {
       setDate(new Date());
@@ -46,12 +52,11 @@ function App() {
       const participantsArray = parsedParticipants.map((participant) => ({
         participantId: parseInt(participant.participantId),
       }));
+      const [hours, minutes] = time.split(":");
+      console.log(`${hours}:${minutes}`);
       const formattedDate = date.toISOString().split("T")[0];
-      const hours = time.getHours().toString().padStart(2, "0");
-      const minutes = time.getMinutes().toString().padStart(2, "0");
-      const seconds = time.getSeconds().toString().padStart(2, "0");
-      const formattedTime = `${hours}:${minutes}:${seconds}`;
-
+      const formattedTime = `${hours}:${minutes}:00`;
+      console.log(formattedTime);
       if (!eventId || !participantsArray) {
         throw Error("no event and prticipants selected");
       }

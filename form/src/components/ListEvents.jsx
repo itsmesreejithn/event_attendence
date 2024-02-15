@@ -43,7 +43,7 @@ const ListEvents = () => {
       }
     };
     fetchEvents();
-  }, [submitEventName]);
+  }, []);
 
   const handleEventChange = (e) => {
     setEventState(e.target.value);
