@@ -1,8 +1,9 @@
 const Events = require("../models/eventModel");
 const Participants = require("../models/participantsModel");
+const { Op } = require("sequelize");
 
 class ApiFeatures {
-  constructor(model, queryString) {
+  constructor(model, queryString, startDate = null, endDate = null) {
     this.model = model;
     this.queryString = queryString;
     this.options = {};
@@ -31,10 +32,15 @@ class ApiFeatures {
   }
 
   filter() {
-    const { filterBy, filterValue } = this.queryString;
+    const { filterBy, filterValue, startDate, endDate } = this.queryString;
     if (filterBy === "category" || filterBy === "eventName") {
       this.includeModel(Events, [], filterBy, filterValue);
       return this;
+    }
+    if (startDate && endDate) {
+      this.filters.date = {
+        [Op.between]: [startDate, endDate],
+      };
     }
     if (filterBy && filterValue) {
       this.filters[filterBy] = filterValue;
@@ -43,7 +49,6 @@ class ApiFeatures {
   }
 
   includeModel(model, throughAttribute = [], filterBy, filterValue) {
-    console.log(filterBy);
     if (model == Events || model == Participants) {
       if (filterBy === "category") {
         this.options.include = [

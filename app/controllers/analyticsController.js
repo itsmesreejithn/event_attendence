@@ -2,21 +2,40 @@ const Participants = require("../models/participantsModel");
 const Mapping = require("../models/eventParticipantsMappingModel");
 const db = require("../utils/dbConnection");
 const { Op, where } = require("sequelize");
+const moment = require("moment");
 const Events = require("../models/eventModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const ApiFeatures = require("../utils/apiFeatures");
 
 exports.createEventWithParticipant = catchAsync(async (req, res, next) => {
-  const { eventId, participants, date, time } = req.body;
-  console.log(eventId);
-  const mappingRecords = participants.map((participant) => {
-    return {
-      eventId: eventId,
-      participantId: participant.participantId,
-      date,
-      time,
-    };
+  const { eventId, participants, time, startDate, endDate, frequency } =
+    req.body;
+  if (
+    !moment(startDate, "YYYY-MM-DD", true).isValid() ||
+    !moment(endDate, "YYYY-MM-DD").isValid()
+  ) {
+    return next(new AppError("Invalid date format", 400));
+  }
+  const startMoment = moment(startDate);
+  const endMoment = moment(endDate);
+  const dates = [];
+  while (startMoment.isSameOrBefore(endMoment)) {
+    if (startMoment.day() !== 0 && startMoment.day() !== 6) {
+      dates.push(startMoment.format("YYYY-MM-DD"));
+    }
+    startMoment.add(frequency, "days");
+  }
+  const mappingRecords = [];
+  participants.forEach((participant) => {
+    dates.forEach((date) => {
+      mappingRecords.push({
+        eventId: eventId,
+        participantId: participant.participantId,
+        date,
+        time,
+      });
+    });
   });
 
   await Mapping.bulkCreate(mappingRecords);
@@ -27,12 +46,19 @@ exports.createEventWithParticipant = catchAsync(async (req, res, next) => {
       event: mappingRecords,
     },
   });
-
-  next(error);
 });
 
 exports.getAllEventsWithParticipants = catchAsync(async (req, res, next) => {
-  const { page, limit, sortBy, sortOrder, filterBy, filterValue } = req.query;
+  const {
+    page,
+    limit,
+    sortBy,
+    sortOrder,
+    filterBy,
+    filterValue,
+    startDate,
+    endDate,
+  } = req.query;
 
   const features = new ApiFeatures(Mapping, {
     page,
@@ -41,6 +67,8 @@ exports.getAllEventsWithParticipants = catchAsync(async (req, res, next) => {
     sortOrder,
     filterBy,
     filterValue,
+    startDate,
+    endDate,
   })
     .paginate()
     .sort()
@@ -115,7 +143,7 @@ exports.getEventsWithParticipnats = catchAsync(async (req, res, next) => {
 exports.updateEventPraticipant = catchAsync(async (req, res, next) => {
   const eventId = req.params.id;
 
-  const { participationMode, participantId, date } = req.body;
+  const { participationMode, participantId, date, time } = req.body;
 
   if (!eventId || !participantId)
     return next(
@@ -136,6 +164,10 @@ exports.updateEventPraticipant = catchAsync(async (req, res, next) => {
 
   if (participationMode) {
     eventParticipantMapping.participationMode = participationMode;
+    await eventParticipantMapping.save();
+  }
+  if (time) {
+    eventParticipantMapping.time = time;
     await eventParticipantMapping.save();
   }
   res.status(200).json({
