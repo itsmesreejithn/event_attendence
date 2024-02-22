@@ -9,8 +9,15 @@ const AppError = require("../utils/appError");
 const ApiFeatures = require("../utils/apiFeatures");
 
 exports.createEventWithParticipant = catchAsync(async (req, res, next) => {
-  const { eventId, participants, time, startDate, endDate, frequency } =
-    req.body;
+  const {
+    eventId,
+    participants,
+    time,
+    startDate,
+    endDate,
+    frequency,
+    specificDays,
+  } = req.body;
   if (
     !moment(startDate, "YYYY-MM-DD", true).isValid() ||
     !moment(endDate, "YYYY-MM-DD").isValid()
@@ -20,11 +27,20 @@ exports.createEventWithParticipant = catchAsync(async (req, res, next) => {
   const startMoment = moment(startDate);
   const endMoment = moment(endDate);
   const dates = [];
-  while (startMoment.isSameOrBefore(endMoment)) {
-    if (startMoment.day() !== 0 && startMoment.day() !== 6) {
-      dates.push(startMoment.format("YYYY-MM-DD"));
+  if (specificDays && specificDays.length > 0) {
+    while (startMoment.isSameOrBefore(endMoment)) {
+      if (specificDays.includes(startDate.day())) {
+        dates.push(startMoment.format("YYYY-MM-DD"));
+      }
+      startMoment.add(frequency, "days");
     }
-    startMoment.add(frequency, "days");
+  } else {
+    while (startMoment.isSameOrBefore(endMoment)) {
+      if (startMoment.day() !== 0 && startMoment.day() !== 6) {
+        dates.push(startMoment.format("YYYY-MM-DD"));
+      }
+      startMoment.add(frequency, "days");
+    }
   }
   const mappingRecords = [];
   participants.forEach((participant) => {
@@ -123,12 +139,16 @@ exports.getAllEventsWithParticipants = catchAsync(async (req, res, next) => {
 
 exports.getEventsWithParticipnats = catchAsync(async (req, res, next) => {
   const eventId = req.params.id;
+  const { date } = req.query;
   if (!eventId) return next(new AppError("The eventId must be provided", 404));
   const eventParticipant = await Events.findByPk(eventId, {
     include: [
       {
         model: Participants,
-        through: { attributes: ["participationMode", "date", "time"] },
+        through: {
+          attributes: ["participationMode", "date", "time"],
+          where: { date: date },
+        },
       },
     ],
   });
@@ -180,21 +200,18 @@ exports.updateEventPraticipant = catchAsync(async (req, res, next) => {
 
 exports.deleteEventParticipant = catchAsync(async (req, res, next) => {
   const eventId = req.params.id;
+  const { participantId, date } = req.body;
   if (!eventId) return next(new AppError("The eventId must be provided", 404));
-  const findEventParticipant = await Events.findByPk(eventId, {
-    include: {
-      model: Participants,
-    },
-  });
-  if (!findEventParticipant)
-    return next(new AppError("No event present with this eventId", 404));
-  await db.transaction(async (transaction) => {
-    await findEventParticipant.destroy(transaction);
+  if (!participantId)
+    return next(new AppError("The participantId must be provided", 404));
+  if (!date) return next(new AppError("The date must be provided", 404));
 
-    await Mapping.destroy({
-      where: { eventId },
-      transaction,
-    });
+  await Mapping.destroy({
+    where: {
+      eventId: eventId,
+      participantId: participantId,
+      date: date,
+    },
   });
   res.status(200).json({
     status: "success",
