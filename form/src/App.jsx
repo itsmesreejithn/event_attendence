@@ -68,6 +68,9 @@ function App() {
       });
       if (response) {
         setShowAlert(true);
+        setTimeout(() => {
+          setShowAlert(false);
+        }, 2000);
       }
     } catch (error) {
       alert(error.message);
@@ -80,8 +83,8 @@ function App() {
       {showAlert ? (
         <Alert
           variant="success"
-          onClose={() => setShowAlert(false)}
-          dismissible
+          // onClose={() => setShowAlert(false)}
+          // dismissible
         >
           <Alert.Heading>The data submitted successfully</Alert.Heading>
         </Alert>
