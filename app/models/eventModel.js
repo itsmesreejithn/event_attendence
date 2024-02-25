@@ -15,10 +15,10 @@ const Events = db.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    ibu: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+    // ibu: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false,
+    // },
     category: {
       type: DataTypes.STRING,
       allowNull: false,
