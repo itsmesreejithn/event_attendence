@@ -1,7 +1,8 @@
-const { DataTypes, Sequelize } = require("sequelize");
+const { DataTypes, Sequelize, col } = require("sequelize");
 const db = require("../utils/dbConnection");
 const Events = require("./eventModel");
 const Participants = require("./participantsModel");
+const User = require("./userModel");
 
 const EventParticipantMapping = db.define(
   "eventparticipantmapping",
@@ -45,6 +46,8 @@ const EventParticipantMapping = db.define(
     timestamps: false,
   }
 );
+
+User.sync().then(() => console.log("User table created"));
 
 Participants.belongsToMany(Events, {
   through: EventParticipantMapping,
