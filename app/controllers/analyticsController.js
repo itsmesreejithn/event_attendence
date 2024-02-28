@@ -64,6 +64,79 @@ exports.createEventWithParticipant = catchAsync(async (req, res, next) => {
   });
 });
 
+// exports.getAllEventsWithParticipants = catchAsync(async (req, res, next) => {
+//   const {
+//     page,
+//     limit,
+//     sortBy,
+//     sortOrder,
+//     filterBy,
+//     filterValue,
+//     startDate,
+//     endDate,
+//   } = req.query;
+
+//   const features = new ApiFeatures(Mapping, {
+//     page,
+//     limit,
+//     sortBy,
+//     sortOrder,
+//     filterBy,
+//     filterValue,
+//     startDate,
+//     endDate,
+//   })
+//     .paginate()
+//     .sort()
+//     .filter();
+
+//   const mappings = await features.execute();
+
+//   const eventsByDate = {};
+//   mappings.forEach((mapping) => {
+//     const eventDate = mapping.date;
+//     if (!eventsByDate[eventDate]) {
+//       eventsByDate[eventDate] = [];
+//     }
+//     eventsByDate[eventDate].push(mapping);
+//   });
+
+//   const eventsWithParticipantsByDate = await Promise.all(
+//     Object.entries(eventsByDate).map(async ([date, mappings]) => {
+//       const eventsWithParticipants = [];
+//       await Promise.all(
+//         mappings.map(async (mapping) => {
+//           const event = await Events.findByPk(mapping.eventId);
+//           const participant = await Participants.findByPk(
+//             mapping.participantId
+//           );
+//           if (!eventsWithParticipants[mapping.eventId]) {
+//             eventsWithParticipants[mapping.eventId] = {
+//               eventId: event.eventId,
+//               eventName: event.eventName,
+//               time: mapping.time,
+//               category: event.category,
+//               participants: [],
+//             };
+//           }
+//           eventsWithParticipants[event.eventId].participants.push({
+//             participantId: participant.participantId,
+//             participantName: participant.participantName,
+//             participationMode: mapping.participationMode,
+//           });
+//         })
+//       );
+//       return { date, events: eventsWithParticipants };
+//     })
+//   );
+//   res.status(200).json({
+//     status: "success",
+//     data: {
+//       eventsWithParticipantsByDate,
+//     },
+//   });
+// });
+
 exports.getAllEventsWithParticipants = catchAsync(async (req, res, next) => {
   const {
     page,
@@ -126,7 +199,7 @@ exports.getAllEventsWithParticipants = catchAsync(async (req, res, next) => {
           });
         })
       );
-      return { date, events: eventsWithParticipants };
+      return { date, events: Object.values(eventsWithParticipants) };
     })
   );
   res.status(200).json({
