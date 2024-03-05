@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const analyticsController = require("../controllers/analyticsController");
+const auth = require("../controllers/authController");
 
 router
   .route("/")
-  .get(analyticsController.getAllEventsWithParticipants)
-  .post(analyticsController.createEventWithParticipant);
+  .get(auth.protect, analyticsController.getAllEventsWithParticipants)
+  .post(auth.protect, analyticsController.createEventWithParticipant);
 
 router
   .route("/:id")

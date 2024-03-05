@@ -18,18 +18,20 @@ exports.createEventWithParticipant = catchAsync(async (req, res, next) => {
     frequency,
     specificDays,
   } = req.body;
+  console.log(startDate, endDate);
   if (
     !moment(startDate, "YYYY-MM-DD", true).isValid() ||
-    !moment(endDate, "YYYY-MM-DD").isValid()
+    !moment(endDate, "YYYY-MM-DD", true).isValid()
   ) {
     return next(new AppError("Invalid date format", 400));
   }
   const startMoment = moment(startDate);
   const endMoment = moment(endDate);
+  console.log(startMoment, endMoment);
   const dates = [];
   if (specificDays && specificDays.length > 0) {
     while (startMoment.isSameOrBefore(endMoment)) {
-      if (specificDays.includes(startDate.day())) {
+      if (specificDays.includes(startMoment.day())) {
         dates.push(startMoment.format("YYYY-MM-DD"));
       }
       startMoment.add(frequency, "days");

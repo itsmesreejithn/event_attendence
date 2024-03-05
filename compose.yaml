@@ -4,6 +4,7 @@ services:
       context: ./app
     depends_on:
       - event_db
+      - tracker_db
     volumes:
       - ./app:/usr/src/app
     ports:
@@ -26,5 +27,17 @@ services:
     ports:
       - 5432:5432
 
+  tracker_db:
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=toor
+      - MONGO_INITDB_DATABASE=tracker_data
+    ports:
+      - 27017:27017
+    volumes:
+      - tracker_data:/data/db
+
 volumes:
   database:
+  tracker_data:
