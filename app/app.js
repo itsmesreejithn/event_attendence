@@ -9,6 +9,7 @@ const eventRouter = require("./routers/eventRouter");
 const participantRouter = require("./routers/particaipantRouter");
 const analyticsRouter = require("./routers/analyticsRouter");
 const userRouter = require("./routers/userRouter");
+const trackerBlockerRouter = require("./routers/trackerBlockerRouter");
 
 app.use(cors());
 
@@ -19,6 +20,7 @@ app.use("/api/v1/events", eventRouter);
 app.use("/api/v1/participants", participantRouter);
 app.use("/api/v1/analytics", analyticsRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/trackers", trackerBlockerRouter);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));

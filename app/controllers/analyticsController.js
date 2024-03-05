@@ -31,7 +31,7 @@ exports.createEventWithParticipant = catchAsync(async (req, res, next) => {
   const dates = [];
   if (specificDays && specificDays.length > 0) {
     while (startMoment.isSameOrBefore(endMoment)) {
-      if (specificDays.includes(startDate.day())) {
+      if (specificDays.includes(startMoment.day())) {
         dates.push(startMoment.format("YYYY-MM-DD"));
       }
       startMoment.add(frequency, "days");
