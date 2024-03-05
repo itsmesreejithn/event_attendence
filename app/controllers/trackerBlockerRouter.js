@@ -2,6 +2,7 @@ const TrackerData = require("../models/trackerBlokcerModel");
 const Participants = require("../models/participantsModel");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
+const APIFeatures = require("../utils/mongoApiFeatures");
 
 exports.createTrackerBlocker = catchAsync(async (req, res, next) => {
   const { participantId } = req.body;
@@ -19,7 +20,8 @@ exports.createTrackerBlocker = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllTrackerBlocker = catchAsync(async (req, res, next) => {
-  const trackerBlockers = await TrackerData.find();
+  const features = new APIFeatures(TrackerData, req.query).filter();
+  const trackerBlockers = await features.query;
   const trackerBlockersResponse = await Promise.all(
     trackerBlockers.map(async (response) => {
       const participant = await Participants.findByPk(response.participantId);
@@ -30,6 +32,7 @@ exports.getAllTrackerBlocker = catchAsync(async (req, res, next) => {
           participantName,
           trackers: response.trackers,
           blockers: response.blockers,
+          date: response.date,
           isSameBlocker: response.isSameBlocker,
           isBlockerSolved: response.isBlockerSolved,
         };
@@ -59,6 +62,7 @@ exports.getTrackerBlocker = catchAsync(async (req, res, next) => {
       participantName: participant.participantName,
       trackers: trackerBlocker.trackers,
       blockers: trackerBlocker.blockers,
+      date: trackerBlocker.date,
       isSameBlocker: trackerBlocker.isSameBlocker,
       isBlockerSolved: trackerBlocker.isBlockerSolved,
     };
