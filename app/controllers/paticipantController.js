@@ -1,4 +1,5 @@
 const Events = require("../models/eventModel");
+const Mapping = require("../models/eventParticipantsMappingModel");
 const Participants = require("../models/participantsModel");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
@@ -35,14 +36,41 @@ exports.getParticipant = catchAsync(async (req, res, next) => {
 
   const participant = await Participants.findByPk(participantId, {
     include: {
-      model: Events,
-      through: { attributes: ["participationMode", "date", "time"] },
+      model: Mapping,
     },
   });
+  const participantResponse = {
+    participantId: participant.participantId,
+    participantName: participant.participantName,
+    events: [],
+  };
+  const eventMap = {};
+  participant.eventparticipantmappings.forEach((mapping) => {
+    const eventId = mapping.eventId;
+    if (eventMap[eventId]) {
+      eventMap[eventId].dates.push({
+        date: mapping.date,
+        participationMode: mapping.participationMode,
+      });
+    } else {
+      eventMap[eventId] = {
+        eventId: eventId,
+        time: mapping.time,
+        dates: [
+          {
+            date: mapping.date,
+            participationMode: mapping.participationMode,
+          },
+        ],
+      };
+    }
+  });
+
+  participantResponse.events = Object.values(eventMap);
   res.status(200).json({
     status: "success",
     data: {
-      participant,
+      participant: participantResponse,
     },
   });
 });
